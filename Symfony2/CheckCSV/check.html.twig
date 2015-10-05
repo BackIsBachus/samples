@@ -1,0 +1,56 @@
+{% extends "::base.html.twig" %}
+{% block body %}
+
+// This template uses FontAwesome, Hint.css and the grid from Bootdtrap
+// Some of the CSS classes have been replaced by raw CSS in the page for a better understanding
+
+<h2>CSV verification</h2>
+
+<p style="color: orange;" class="hint--top hint--info hint--rounded" data-hint="If there aren't any errors you can import the CSV file"><i class="fa fa-hand-o-right"></i><a href="{{path('ta_user_se_import')}}">Once the CSV file has been checked you can import it.</a><i class="fa fa-hand-o-left"></i></p>
+
+// If we have an error in the CSV file
+{% if state|length > 0 %}
+<div class="col-md-12">
+    <table class="table table-bordered table-striped table-condensed">
+        <tr>
+            <th ><div class="hint--top hint--info" data-hint="Incorrect lines on the CSV">Line</div></th>
+            <th><div class="hint--top hint--info" data-hint="Error if person code not in the LDAP">Person code</div></th>
+            <th><div class="hint--top hint--info" data-hint="Error if person email is invalid">Person email</div></th>
+            <th><div class="hint--top hint--info" data-hint="Error if the location code does not exist in the DB">Location</div></th>
+            <th><div class="hint--top hint--info" data-hint="Error if the date format in incorrect">Start date</div></th>
+            <th><div class="hint--top hint--info" data-hint="Error if the date format in incorrect">End date</div></th>
+        </tr>
+
+        // We fill the table with green checks and red crosses
+        // Or a simple big warning if we don't have the right number of arguments
+        {% for error in state %}
+        <tr>
+            <td>{{ error.ligne }}</td>
+            {% if error.arguments == reference %}
+            {% for test in error.erreurs %}
+            <td>
+                {% if test == 0 %}
+                <div class="hint--top hint--success hint--rounded" data-hint="This field is correct"><i class="fa fa-check" style="color: green;"></i></div>
+                {% else %}
+                <div class="hint--top hint--error hint--rounded" data-hint="This field in incorrect"><i class="fa fa-times" style="color: red;"></i></div>
+                {% endif %}
+            </td>
+            {% endfor %}
+            {% else %}
+            <td colspan="8" style="text-align: center; color: orange;"><strong><div class="hint--top hint--info hint--rounded" data-hint="Nombre d'arguments attendus : {{ reference }}">Nombre d'arguments reçus : {{ error.arguments }}</div></strong></td>
+            {% endif %}
+
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endif %}
+// Here is the form for the CSV file
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+<form method="post" {{ form_enctype(form) }}>
+    {{ form_widget(form) }}
+    <span><input type="submit" class="btn btn-primary" /></span>
+</form>
+
+{% endblock %}
